@@ -36,6 +36,7 @@ import mozilla.components.feature.prompts.widget.MonthAndYearPicker
 import mozilla.components.feature.prompts.widget.TimePrecisionPicker
 import mozilla.components.support.utils.TimePicker.shouldShowSecondsPicker
 import mozilla.components.support.utils.ext.getSerializableCompat
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.util.Calendar
 import java.util.Date
 
@@ -76,6 +77,15 @@ internal class TimePickerDialogFragment :
         set(value) {
             safeArguments.putSerializable(KEY_SELECTED_DATE, value)
         }
+
+    override fun onStart() {
+        super.onStart()
+
+        val alertDialog = dialog
+        if (alertDialog is AlertDialog) {
+            alertDialog.withCenterAlignedButtons()
+        }
+    }
 
     @Suppress("ComplexMethod")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

@@ -21,6 +21,7 @@ import mozilla.components.feature.prompts.dialog.KEY_SESSION_ID
 import mozilla.components.feature.prompts.dialog.KEY_SHOULD_DISMISS_ON_LOAD
 import mozilla.components.feature.prompts.dialog.PromptDialogFragment
 import mozilla.components.support.utils.ext.getParcelableArrayListCompat
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 private const val KEY_PROVIDERS = "KEY_PROVIDERS"
 
@@ -41,6 +42,7 @@ internal class SelectProviderDialogFragment : PromptDialogFragment() {
             .setTitle(R.string.mozac_feature_prompts_identity_credentials_choose_provider)
             .setView(createDialogContentView())
             .create()
+            .withCenterAlignedButtons()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
