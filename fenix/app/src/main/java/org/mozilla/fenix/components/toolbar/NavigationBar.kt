@@ -4,7 +4,10 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,14 +15,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.Text
+import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,20 +66,23 @@ fun NavigationBar(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            actionItems.forEach {
-                when (it.type) {
+            actionItems.forEach { action ->
+                when (action.type) {
                     ItemType.STANDARD -> {
-                        IconButton(onClick = {}) {
+                        LongPressIconButton(
+                            onClick = { action.onClick() },
+                            onLongClick = { action.onLongPress() },
+                        ) {
                             Icon(
-                                painter = painterResource(it.iconId),
-                                stringResource(id = it.descriptionResourceId),
+                                painter = painterResource(action.iconId),
+                                stringResource(id = action.descriptionResourceId),
                                 tint = FirefoxTheme.colors.iconPrimary,
                             )
                         }
                     }
                     ItemType.TAB_COUNTER -> {
-                        IconButton(onClick = {}) {
-                            TabsIcon(item = it, tabsCount = 0)
+                        IconButton(onClick = { action.onClick() }) {
+                            TabsIcon(item = action, tabsCount = 0)
                         }
                     }
 
@@ -85,10 +98,10 @@ fun NavigationBar(
                                 },
                             )
                         } else {
-                            IconButton(onClick = {}) {
+                            IconButton(onClick = { action.onClick() }) {
                                 Icon(
-                                    painter = painterResource(it.iconId),
-                                    stringResource(id = it.descriptionResourceId),
+                                    painter = painterResource(action.iconId),
+                                    stringResource(id = action.descriptionResourceId),
                                     tint = FirefoxTheme.colors.iconPrimary,
                                 )
                             }
@@ -119,6 +132,34 @@ private fun TabsIcon(item: ActionItem, tabsCount: Int) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LongPressIconButton(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interactionSource,
+                indication = rememberRipple(bounded = false, radius = RippleRadius)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
+        CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
+    }
+}
+
 /**
  * Represents a navigation bar element.
  *
@@ -130,7 +171,10 @@ data class ActionItem(
     val iconId: Int,
     val descriptionResourceId: Int,
     val type: ItemType = ItemType.STANDARD,
-)
+) {
+    var onClick: () -> Unit = {}
+    var onLongPress: () -> Unit ={}
+}
 
 /**
  * Enumerates the types of items that can be used in a navigation bar.
@@ -140,6 +184,20 @@ data class ActionItem(
  */
 enum class ItemType {
     STANDARD, TAB_COUNTER, MENU
+}
+
+class ActionItemListBuilder(
+
+) {
+
+    enum class TargetLocation {
+        HOME_FRAGMENT, BROWSER_FRAGMENT
+    }
+
+    fun build() : List<ActionItem> {
+       return NavigationItems.defaultItems
+    }
+
 }
 
 /**
@@ -191,3 +249,5 @@ private fun NavigationBarPrivatePreview() {
         NavigationBar(NavigationItems.defaultItems)
     }
 }
+
+private val RippleRadius = 24.dp

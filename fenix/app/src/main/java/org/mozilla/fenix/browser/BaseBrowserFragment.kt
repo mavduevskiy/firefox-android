@@ -131,6 +131,7 @@ import org.mozilla.fenix.components.FenixSnackbar
 import org.mozilla.fenix.components.FindInPageIntegration
 import org.mozilla.fenix.components.StoreProvider
 import org.mozilla.fenix.components.metrics.MetricsUtils
+import org.mozilla.fenix.components.toolbar.ActionItem
 import org.mozilla.fenix.components.toolbar.BottomToolbarContainerView
 import org.mozilla.fenix.components.toolbar.BrowserFragmentState
 import org.mozilla.fenix.components.toolbar.BrowserFragmentStore
@@ -138,7 +139,9 @@ import org.mozilla.fenix.components.toolbar.BrowserToolbarView
 import org.mozilla.fenix.components.toolbar.DefaultBrowserToolbarController
 import org.mozilla.fenix.components.toolbar.DefaultBrowserToolbarMenuController
 import org.mozilla.fenix.components.toolbar.IncompleteRedesignToolbarFeature
+import org.mozilla.fenix.components.toolbar.NavigationItems
 import org.mozilla.fenix.components.toolbar.ToolbarIntegration
+import org.mozilla.fenix.components.toolbar.ToolbarMenu
 import org.mozilla.fenix.components.toolbar.ToolbarPosition
 import org.mozilla.fenix.components.toolbar.interactor.BrowserToolbarInteractor
 import org.mozilla.fenix.components.toolbar.interactor.DefaultBrowserToolbarInteractor
@@ -463,9 +466,46 @@ abstract class BaseBrowserFragment :
                 null
             }
 
+            val navigationItems: List<ActionItem> = listOf(
+                NavigationItems.back.copy().apply {
+                    onClick = {
+                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+                            ToolbarMenu.Item.Back(viewHistory = false),
+                        )
+                    }
+                    onLongPress = {
+                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+                            ToolbarMenu.Item.Back(viewHistory = true),
+                        )
+                    }
+                },
+                NavigationItems.forward.copy().apply {
+                    onClick = {
+                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+                            ToolbarMenu.Item.Forward(viewHistory = false),
+                        )
+                    }
+                    onLongPress = {
+                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+                            ToolbarMenu.Item.Forward(viewHistory = true),
+                        )
+                    }
+                },
+                NavigationItems.home.copy().apply {
+                    onClick = {
+                        findNavController().navigate(
+                            BrowserFragmentDirections.actionGlobalHome(),
+                        )
+                    }
+                },
+                NavigationItems.tabs.copy(),
+                NavigationItems.menu.copy(),
+            )
+
             BottomToolbarContainerView(
                 context = context,
                 container = binding.browserLayout,
+                navigationItems = navigationItems,
                 androidToolbarView = toolbarView,
                 menuButton = MenuButton(requireContext()).apply {
                     menuBuilder = browserToolbarView.menuToolbar.menuBuilder

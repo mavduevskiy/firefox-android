@@ -89,8 +89,10 @@ import org.mozilla.fenix.components.FenixSnackbar
 import org.mozilla.fenix.components.PrivateShortcutCreateManager
 import org.mozilla.fenix.components.TabCollectionStorage
 import org.mozilla.fenix.components.appstate.AppAction
+import org.mozilla.fenix.components.toolbar.ActionItem
 import org.mozilla.fenix.components.toolbar.BottomToolbarContainerView
 import org.mozilla.fenix.components.toolbar.IncompleteRedesignToolbarFeature
+import org.mozilla.fenix.components.toolbar.NavigationItems
 import org.mozilla.fenix.components.toolbar.ToolbarPosition
 import org.mozilla.fenix.databinding.FragmentHomeBinding
 import org.mozilla.fenix.ext.components
@@ -449,9 +451,18 @@ class HomeFragment : Fragment() {
                 menuButton = WeakReference(menuButton),
             ).also { it.build() }
 
+            val navigationItems: List<ActionItem> = listOf(
+                NavigationItems.back.copy(),
+                NavigationItems.forward.copy(),
+                NavigationItems.home.copy(),
+                NavigationItems.tabs.copy(),
+                NavigationItems.menu.copy(),
+            )
+
             BottomToolbarContainerView(
                 context = requireContext(),
                 container = binding.homeLayout,
+                navigationItems = navigationItems,
                 androidToolbarView = toolbarView,
                 menuButton = menuButton,
             )
